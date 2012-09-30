@@ -35,7 +35,11 @@
      <tbody>
      <%
      gerritProject = project
-     Net::SSH.start('127.0.0.1', 'balp', :port => 29418) do |ssh|
+     hostname = Setting.plugin_chiliproject_gerritbox_box['gerrit_servername']
+     port = Setting.plugin_chiliproject_gerritbox_box['gerrit_serverport']
+     username = Setting.plugin_chiliproject_gerritbox_box['gerrit_username']
+     sshkey = Setting.plugin_chiliproject_gerritbox_box['gerrit_sshkey']
+     Net::SSH.start(hostname, username, :port => port) do |ssh|
         ssh.exec("gerrit query --format JSON --current-patch-set project:#{gerritProject}") do |channel, stream, data|
 	  cnt = 0
 	  data.each do |line|

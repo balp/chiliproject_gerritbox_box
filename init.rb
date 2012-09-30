@@ -7,4 +7,11 @@ Redmine::Plugin.register :chiliproject_gerritbox_box do
   version '0.0.1'
   url 'https://github.com/balp/chiliproject_gerritbox_box'
   author_url 'https://github.com/balp/'
+  settings :default => { "gerrit_servername" => "127.0.0.1",
+                         "gerrit_serverport" => 29418,
+                         "gerrit_username" => "balp",
+                         "gerrit_sshkey" => ""
+                       },
+            :partial => 'settings/gerritbox'
+
 end
