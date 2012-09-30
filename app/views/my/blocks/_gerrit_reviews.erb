@@ -1,0 +1,66 @@
+<h3> Gerrit Reviews </h3>
+<%
+  require 'set'
+  require 'net/ssh'
+  require 'json'
+
+  projs = Set.new()
+  roles_projs = User.current.projects_by_role
+  roles_projs.each_pair{|k,v| v.each{|p| projs.add(p)}}
+  def get_approval( type, patchset )
+    if patchset.has_key? 'approvals'
+      patchset['approvals'].each do |approval| 
+        if approval['type'] == type
+	   return approval['value']
+	end
+      end
+    end
+    return ""
+  end
+-%>
+  <%
+     rows = 0
+     totaltime = 0
+     projs.each do |project|
+  %>
+     <table class="list issues">
+     <thead>
+     <tr><th colspan="4"> Project: <%= h project %> </th> </tr>
+     <tr>
+     <th> No </th><th> Branch </th>
+     <th> Owner </th> <th> Subject </th>
+     <th> Review </th><th> Verify </th>
+     </tr>
+     </thead>
+     <tbody>
+     <%
+     gerritProject = project
+     Net::SSH.start('127.0.0.1', 'balp', :port => 29418) do |ssh|
+        ssh.exec("gerrit query --format JSON --current-patch-set project:#{gerritProject}") do |channel, stream, data|
+	  cnt = 0
+	  data.each do |line|
+	  result = JSON.parse(line)
+	  if result.has_key? 'type'
+            rows = rows + result['rowCount']
+            totaltime = totaltime + result['runTimeMilliseconds']
+	  end
+	  if result.has_key? 'project'
+	    cnt += 1
+     %>
+          <tr  class="<%= cnt%2==0?'even':'odd' %>">
+	    <td><%= h result['number'] %></td>
+	    <td><%= h result['branch'] %></td>
+	    <td><%= h result['owner']['name'] %></td>
+	    <td><a href="<%= result['url'] %>"><%= h result['subject'] %></a></td>
+	    <td><%= h get_approval('CRVW', result['currentPatchSet']) %></td>
+	    <td><%= h get_approval('VRIF', result['currentPatchSet']) %></td>
+	  </tr>
+
+       <%   end -%>
+     <%   end -%>
+     <%  end -%>
+     <% end -%>
+     </tbody>
+     </table>
+  <% end -%>
+  Rows: <%= h rows %> GerritRuntime: <%= h totaltime %> milliseconds.
