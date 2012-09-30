@@ -1,0 +1,8 @@
+<h3> Gerrit Box Stuff </h3>
+<%
+  require 'set'
+  Gerritlink.find(:all).each do |gerrit|
+%>
+  <% h gerrit.gerritname %><br/><br/>
+
+<% end -%>

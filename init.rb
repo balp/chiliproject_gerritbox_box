@@ -1,4 +1,5 @@
 require 'redmine'
+require 'project_settings'
 
 Redmine::Plugin.register :chiliproject_gerritbox_box do
   name 'Chiliproject Gerrit My Page plugin'
